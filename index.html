@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>recolte</title>
+  <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.2.0/css/bootstrap.min.css" type="text/css" />
+  <link rel="stylesheet" href="static/css/jquery.Jcrop.min.css" type="text/css" />
+</head>
+<body>
+  <div class="list-group">
+    <div class="list-group-item">
+      <span class="btn btn-success fileinput-button">
+        <span>select</span>
+        <input id="advanced_file" type="file" onchange="Imageupload.addfile();"/>
+      </span>
+      <button id="advanced_screenshot" class="btn btn-warning" onclick="Imageupload.screenshot();">
+        <span>crop</span>
+      </button>
+      <button id="advanced_upload" class="btn btn-primary" onclick="Imageupload.upload();">
+        <span>upload</span>
+      </button>
+      <span id="message"></span>
+    </div>
+    <div class="list-group-item">
+      <span>x</span><input type="text" id="x" value=""/>
+      <span>y</span><input type="text" id="y" value=""/>
+      <span>w</span><input type="text" id="w" value=""/>
+      <span>h</span><input type="text" id="h" value=""/>
+    </div>
+    <div class="list-group-item">
+      <div class="row">
+        <div class="col-md-12">
+          <output id="target">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzc1Ij48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjM3NSIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjI1MCIgeT0iMTg3IiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE1cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+b3JpZ2luYWw8L3RleHQ+PC9zdmc+DQo=">
+          </output>
+        </div>
+        <div class="col-md-6">
+          <output id="preview">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iMzc1Ij48cmVjdCB3aWR0aD0iNTAwIiBoZWlnaHQ9IjM3NSIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjI1MCIgeT0iMTg3IiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE1cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+Y3JvcDwvdGV4dD48L3N2Zz4NCg==" style="width: 500px; height: 375px; display: block;">
+          </output>
+          <h5>crop image</h5>
+        </div>
+        <div class="col-md-3">
+          <output id="preview_large">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNjAiIGhlaWdodD0iMTk1Ij48cmVjdCB3aWR0aD0iMjYwIiBoZWlnaHQ9IjE5NSIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEzMCIgeT0iOTciIHN0eWxlPSJmaWxsOiNhYWE7Zm9udC13ZWlnaHQ6Ym9sZDtmb250LXNpemU6MTVweDtmb250LWZhbWlseTpBcmlhbCxIZWx2ZXRpY2Esc2Fucy1zZXJpZjtkb21pbmFudC1iYXNlbGluZTpjZW50cmFsIj4yNjB4MTk1PC90ZXh0Pjwvc3ZnPg0K" style="width: 260px; height: 195px; display: block;">
+          </output>
+          <h5>260X195px</h5>
+        </div>
+        <div class="col-md-2">
+          <output id="preview_medium">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMTA1Ij48cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjEwNSIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjcwIiB5PSI1MiIgc3R5bGU9ImZpbGw6I2FhYTtmb250LXdlaWdodDpib2xkO2ZvbnQtc2l6ZToxNXB4O2ZvbnQtZmFtaWx5OkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmO2RvbWluYW50LWJhc2VsaW5lOmNlbnRyYWwiPjE0MHgxMDU8L3RleHQ+PC9zdmc+DQo=" style="width: 140px; height: 105px; display: block;">
+          </output>
+          <h5>140X105px</h5>
+        </div>
+        <div class="col-md-1">
+          <output id="preview_small">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI2MCI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZWVlIi8+PHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iNDAiIHk9IjMwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE1cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+ODB4NjA8L3RleHQ+PC9zdmc+DQoNCg==" style="width: 80px; height: 60px; display: block;">
+          </output>
+          <h5>80X60px</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<style type="text/css">
+.fileinput-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.fileinput-button input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  font-size: 200px;
+  direction: ltr;
+  cursor: pointer;
+}
+
+.original-img {
+  width: 480px;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+};
+</style>
+
+
+<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="static/js/jquery.Jcrop.min.js"></script>
+
+
+<script type="text/javascript">
+    
+var Imageupload = {
+
+  coords : null,
+
+  addfile : function() {
+
+    var element = document.getElementById('advanced_file');
+    var file = element.files[0];
+
+    if (!file.type.match('image.*')) {
+      alert('file format error, select again');
+      return false;
+    }
+
+    var reader = new FileReader();
+
+    reader.onload = (function (f) {
+      return function (e) {
+        var $img = $('<img>').attr('src', e.target.result);
+
+        $('#target').html($img);
+
+        Imageupload.initCrop();
+      };
+    })(file);
+
+    reader.readAsDataURL(file);
+  },
+
+  screenshot : function() {
+
+    var $canvas = $('<canvas/>');
+    var $canvasLarge = $('<canvas/>');
+    var $canvasMedium = $('<canvas/>');
+    var $canvasSmall = $('<canvas/>');
+
+    var context = $canvas[0].getContext("2d");
+    var contextLarge = $canvasLarge[0].getContext("2d");
+    var contextMedium = $canvasMedium[0].getContext("2d");
+    var contextSmall = $canvasSmall[0].getContext("2d");
+
+    var ratio = 1;
+    var maxWidth = 500;
+    var maxHeight = 375;
+    var largeWidth = 260;
+    var largeHeight = 195;
+    var mediumWidth = 140;
+    var mediumHeight = 105;
+    var smallWidth = 80;
+    var smallHeight = 60;
+    var finalWidth;
+    var finalHeight;
+
+    var c = Imageupload.coords;
+    var image = new Image();
+
+    if (c.w > maxWidth)
+      ratio = maxWidth / c.w;
+    else if (c.h > maxHeight)
+      ratio = maxHeight / c.h;
+
+    finalWidth = c.w * ratio;
+    finalHeight = c.h * ratio;
+
+    $canvas.attr("width", finalWidth).attr("height", finalHeight);
+    $canvasLarge.attr("width", largeWidth).attr("height", largeHeight);
+    $canvasMedium.attr("width", mediumWidth).attr("height", mediumHeight);
+    $canvasSmall.attr("width", smallWidth).attr("height", smallHeight);
+
+    image.src = $('#target>img').attr('src');
+
+    context.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, finalWidth, finalHeight);
+    contextLarge.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, largeWidth, largeHeight);
+    contextMedium.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, mediumWidth, mediumHeight);
+    contextSmall.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, smallWidth, smallHeight);
+
+    $('#preview').html($canvas);
+    $('#preview_large').html($canvasLarge);
+    $('#preview_medium').html($canvasMedium);
+    $('#preview_small').html($canvasSmall);
+  },
+
+  upload : function() {
+
+    var canvases = $('canvas');
+    var imageCrop = canvases[0].toDataURL('jpeg');
+    var imageLarge = canvases[1].toDataURL('jpeg');
+    var imageMedium = canvases[2].toDataURL('jpeg');
+    var imageSmall = canvases[3].toDataURL('jpeg');
+
+    $.ajax({
+      type : 'post',
+      dataType : 'json',
+      url :'/saveImage',
+      beforeSend : function() {
+        $("#message").text("Uploading...");
+      },
+      data : {
+        'image_crop': imageCrop,
+        'image_large': imageLarge,
+        'image_medium': imageMedium,
+        'image_small': imageSmall,
+      },
+
+      success : function(response){
+        $("#message").text("");
+        if(response.code==1){
+          Common.ialert('Upload Success');
+        }else{
+          $("#message").text(response.message);
+        }
+      },
+      error : function(response){
+        $("#message").text(response.message);
+      }
+    });
+  },
+
+  showCoords: function(coords) {
+    Imageupload.coords = coords;
+
+    $('#x').val(coords.x);
+    $('#y').val(coords.y);
+    $('#w').val(coords.w);
+    $('#h').val(coords.h);
+  },
+
+  initCrop: function() {
+    $('#target > img').Jcrop({
+            aspectRatio: 4/3,
+            onSelect: Imageupload.showCoords,
+            onChange: Imageupload.showCoords,
+    });
+
+    $('#x').val(0);
+    $('#y').val(0);
+    $('#w').val(0);
+    $('#h').val(0);
+  },
+}
+
+</script>
+
+</html>
